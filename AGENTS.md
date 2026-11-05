@@ -245,3 +245,7 @@ the `CONTEXT.md` glossary says.
 fallback for Z-Library's ~10 downloads/day ceiling. Failover across mirrors (`li → vg →
 la`) is driven by bytes actually served, not by key resolution — a mirror can return a
 valid key while its CDN node is dead.
+
+## Biblioteca fork maintenance
+
+This fork maintains `fix/biblioteca-privacy` as its stable default integration branch. The upstream two-week development-branch age rule does not apply to this maintained default branch. Read `docs/biblioteca-privacy.md` before changing the local privacy behavior. Never commit credentials, Keychain material, personal configuration or downloaded books.

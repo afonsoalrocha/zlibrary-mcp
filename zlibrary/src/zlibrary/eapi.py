@@ -339,13 +339,31 @@ class EAPIClient:
     def base_url(self) -> str:
         return f"https://{self.domain}"
 
+    def _scoped_cookies(self) -> httpx.Cookies:
+        """Keep account cookies on the explicitly configured HTTPS host."""
+        cookies = httpx.Cookies()
+        host = urlsplit(self.base_url).hostname
+        for name, value in self._cookies.items():
+            cookies.set(name, value, domain=host, path="/")
+        return cookies
+
+    async def _guard_request(self, request: httpx.Request) -> None:
+        """Recheck every redirect; external download hosts receive no cookies."""
+        if request.url.scheme != "https":
+            raise RuntimeError("Refusing a non-HTTPS Z-Library request")
+        origin = httpx.URL(self.base_url)
+        if (request.url.host, request.url.port) != (origin.host, origin.port):
+            request.headers.pop("cookie", None)
+            request.headers.pop("authorization", None)
+
     async def _get_client(self) -> httpx.AsyncClient:
         if self._client is None or self._client.is_closed:
             self._client = httpx.AsyncClient(
                 headers=EAPI_HEADERS,
-                cookies=self._cookies,
+                cookies=self._scoped_cookies(),
                 timeout=httpx.Timeout(30.0, connect=10.0),
-                follow_redirects=True,
+                follow_redirects=False,
+                event_hooks={"request": [self._guard_request]},
             )
         return self._client
 
@@ -526,9 +544,10 @@ class EAPIClient:
         try:
             # Stream download
             async with httpx.AsyncClient(
-                cookies=self._cookies,
+                cookies=self._scoped_cookies(),
                 follow_redirects=True,
                 timeout=httpx.Timeout(60.0, connect=10.0),
+                event_hooks={"request": [self._guard_request]},
             ) as dl_client:
                 async with dl_client.stream("GET", download_url) as response:
                     response.raise_for_status()

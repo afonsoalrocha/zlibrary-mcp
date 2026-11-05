@@ -1,5 +1,7 @@
 # Z-Library MCP Server
 
+This fork includes [Biblioteca privacy changes](docs/biblioteca-privacy.md). Personal credentials and machine-specific configuration are not included.
+
 [![CI](https://github.com/rookslog/zlibrary-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/rookslog/zlibrary-mcp/actions/workflows/ci.yml)
 [![npm version](https://img.shields.io/npm/v/zlibrary-mcp)](https://www.npmjs.com/package/zlibrary-mcp)
 [![License: MIT](https://img.shields.io/github/license/rookslog/zlibrary-mcp)](LICENSE)
